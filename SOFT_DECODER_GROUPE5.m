@@ -60,7 +60,12 @@ end
 function isBinaryVector = isBinaryVector(vector)
      % Vérifie si le vecteur ne contient que des 0 et des 1
      uniqueValues = unique(vector);
-     isBinaryVector = isequal(uniqueValues, [0; 1]);
+     isBinaryVector = true;
+     for i=uniqueValues
+         if i~=0 & i~=1
+             isBinaryVector = false;
+         end
+     end
 end
    
 function isProbabilityVector = isProbabilityVector(vector)
