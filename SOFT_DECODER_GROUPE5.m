@@ -16,7 +16,7 @@ function result = SOFT_DECODER_GROUPE5(c, H, p, MAX_ITER)
     end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    
-   q = initq(H, p, nb_lines_H, nb_col_H);
+   q = initq(H, p, nb_lines_H, nb_col_H);  
    r_1 = zeros(nb_lines_H, nb_col_H);
    for iter = 1:MAX_ITER
         r_1 = calculate_r_1(r_1, q);
@@ -27,7 +27,7 @@ function result = SOFT_DECODER_GROUPE5(c, H, p, MAX_ITER)
         
         for i = 1:nb_col_H
             if (Q(2, i) > Q(1,i))
-               c(i) = 1; 
+                c(i) = 1; 
             else
                 c(i) = 0;
             end
@@ -97,11 +97,11 @@ function r_1 = calculate_r_1(r_1, q)
     for i = 1:nb_lines_r_1
         for j = 1:nb_col_r_1
             sum_prod = 1;
-            for k = 1:nb_lines_r_1
-                if (k == i)
+            for k = 1:nb_col_r_1
+                if (k == j)
                     continue;
                 end
-                sum_prod = sum_prod * (1-2*q_1(k,j));
+                sum_prod = sum_prod * (1-2*q_1(i,k));
             end
             r_1(i,j) = 1 - (0.5 + 0.5*sum_prod);
         end
@@ -115,20 +115,26 @@ function q = calculate_q(q, r_1, p)
         for j = 1:nb_col_r
             sum_prod_1 = 1;
             sum_prod_0 = 1;
-            for k = 1:nb_col_r
-                if (k == j)
+            for k = 1:nb_lines_r
+                if (k == i)
                     continue;
                 end
-                sum_prod_1 = sum_prod_1 * r_1(i,k);
-                sum_prod_0 = sum_prod_0 * (1-r_1(i,k));
+                sum_prod_1 = sum_prod_1 * r_1(k,j);
+                sum_prod_0 = sum_prod_0 * (1-r_1(k,j));
+                %disp("prod_1="+sum_prod_1);
             end
-            q(1,i,j) = (1-p(i)) * sum_prod_0;
-            q(2,i,j) = p(i) * sum_prod_1;
+            q(1,i,j) = (1-p(j)) * sum_prod_0;
+            q(2,i,j) = p(j) * sum_prod_1;
             K(i,j) = 1/(q(1,i,j) + q(2,i,j));
+            %disp("q(1,"+i+","+j+") = "+q(1,i,j));
+            %disp("q(2,"+i+","+j+") = "+q(2,i,j));
+            %disp("K("+i+","+j+"= "+K(i,j));
             q(1,i,j) = K(i,j) * q(1,i,j);
             q(2,i,j) = K(i,j) * q(2,i,j);
         end
     end
+    %disp(q(1,1,1));
+    %disp(q(2,1,1));
 end
 
 function Q = calculate_Q(p, r_1)
