@@ -16,12 +16,12 @@ function result = SOFT_DECODER_GROUPE5(c, H, p, MAX_ITER)
     end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    
-   q = initq(H, p, nb_lines_H, nb_col_H);  
+   q = initq(H, p, nb_lines_H, nb_col_H);  % Etape 1 - Initialisation de la matrice q
    r_1 = zeros(nb_lines_H, nb_col_H);
    for iter = 1:MAX_ITER
-        r_1 = calculate_r_1(r_1, q);
+        r_1 = calculate_r_1(r_1, q); % Etape 2 - On calcule r(1)
         
-        q = calculate_q(q, r_1, p);
+        q = calculate_q(q, r_1, p); % Etape 3 - On réajuste q en fonction de la réponse r
         
         Q = calculate_Q(p, r_1);
         
@@ -35,7 +35,7 @@ function result = SOFT_DECODER_GROUPE5(c, H, p, MAX_ITER)
         
         is_even = check_parity(nb_col_H, c);
         
-        if (is_even)
+        if (is_even) % Si la parité est respectée on sort de la boucle, sinon on refait une itération
            break; 
         end
    end
@@ -43,6 +43,7 @@ function result = SOFT_DECODER_GROUPE5(c, H, p, MAX_ITER)
 end
 
 function is_even = check_parity(H, c)
+    % Vérifie la parité de c
     [c_nodes, v_nodes] = size(H);
     check = zeros(c_nodes, 1);
     for i = 1:c_nodes
@@ -80,6 +81,9 @@ function isBinaryMatrix = isBinaryMatrix(matrix)
 end
 
 function q = initq(H, p, nb_lines_H, nb_col_H)
+    % En accord avec l'étape 1 du document, on initialise la matrice q
+    % q(1,i,j) correspond à q_ij(0) dans le document
+    % q(2,i,j) correspond à q_ij(1) dans le document
     q = zeros(2, nb_lines_H, nb_col_H);
     for i = 1:nb_lines_H
         for j = 1:nb_col_H
@@ -93,7 +97,7 @@ end
 
 function r_1 = calculate_r_1(r_1, q)
     [nb_lines_r_1, nb_col_r_1] = size(r_1);
-    q_1 = squeeze(q(2,:,:));
+    q_1 = squeeze(q(2,:,:)); % On stocke q_ij(1) dans q_1
     for i = 1:nb_lines_r_1
         for j = 1:nb_col_r_1
             sum_prod = 1;
@@ -121,20 +125,14 @@ function q = calculate_q(q, r_1, p)
                 end
                 sum_prod_1 = sum_prod_1 * r_1(k,j);
                 sum_prod_0 = sum_prod_0 * (1-r_1(k,j));
-                %disp("prod_1="+sum_prod_1);
             end
             q(1,i,j) = (1-p(j)) * sum_prod_0;
             q(2,i,j) = p(j) * sum_prod_1;
             K(i,j) = 1/(q(1,i,j) + q(2,i,j));
-            %disp("q(1,"+i+","+j+") = "+q(1,i,j));
-            %disp("q(2,"+i+","+j+") = "+q(2,i,j));
-            %disp("K("+i+","+j+"= "+K(i,j));
             q(1,i,j) = K(i,j) * q(1,i,j);
             q(2,i,j) = K(i,j) * q(2,i,j);
         end
     end
-    %disp(q(1,1,1));
-    %disp(q(2,1,1));
 end
 
 function Q = calculate_Q(p, r_1)
